@@ -1,0 +1,90 @@
+version: '2.2'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es01
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - cluster.name=es-docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.security.enabled=false
+ 
+    volumes:
+      - ./conf/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/elasticsearch.yml
+ 
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+ 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
+    hostname: "tag-filebeat"
+    container_name: "tag-filebeat"
+    entrypoint: "filebeat -e -strict.perms=false"
+    volumes:
+      - "./movie:/movie"
+      - "./critic:/critic"
+      - "./user:/user"
+      - "./log:/log"
+      - ./conf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    depends_on:
+    - kibana
+  logstash:
+    image: logstash:${STACK_VERSION}
+    hostname: "fpp-logstash"
+    container_name: "fpp-logstash"
+    volumes:
+      - "./data:/data:rw"
+      - "./conf/logstash/conf:/pipelines"
+      - "./conf/logstash/pipelines.yml:/usr/share/logstash/config/pipelines.yml"
+ 
+  #metricbeat:
+  #  container_name: metricbeat
+  #  hostname: metricbeat
+  #  user: root #To read the docker socket
+  #  image: docker.elastic.co/beats/metricbeat:8.4.3
+  #  volumes:
+  #    - ./data:/data
+  #    - ./conf/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+  #    - ./conf/metricbeat/modules.d/:/usr/share/metricbeat/modules.d/
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #  command: metricbeat -e -system.hostfs=/hostfs -strict.perms=false
+ 
+ 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    volumes:
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+    mem_limit: ${MEM_LIMIT}
+   
+  #web:
+  #    build: .
+  #    command: python manage.py runserver 0.0.0.0:80
+  #    volumes:
+  #      - .:/code
+  #    ports:
+  #      - "80:80"
+  #    depends_on:
+  #      - es01
+ 
+networks:
+  elastic:
+    driver: bridge
+ 
+volumes:
+  data01:
+    driver: local
+  kibanadata:
+    driver: local

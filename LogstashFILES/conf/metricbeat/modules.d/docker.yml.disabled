@@ -1,0 +1,10 @@
+# Module: docker
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/7.16/metricbeat-module-docker.html
+
+- module: docker
+  metricsets:
+    - cpu
+    - memory
+    - information
+  period: 30s
+  hosts: ["unix:///var/run/docker.sock"]

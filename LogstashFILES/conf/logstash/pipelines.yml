@@ -1,0 +1,33 @@
+# This file is where you define your pipelines. You can define multiple.
+# For more information on multiple pipelines, see the documentation:
+#   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+
+
+#INPUT GENERAL
+- pipeline.id: input-beats
+  path.config: "/pipelines/beats"
+  queue.type : persisted
+
+# movie pipeline
+- pipeline.id: movies_pipeline
+  path.config: "/pipelines/pro01/movies_pipeline.conf"
+  queue.type : persisted
+
+
+# critic pipeline
+- pipeline.id: critic_pipeline
+  path.config: "/pipelines/pro02/critic_pipeline.conf"
+  queue.type : persisted
+
+
+#user pipeline
+- pipeline.id: user_pipeline
+  path.config: "/pipelines/pro03/user_pipeline.conf"
+  queue.type : persisted
+
+
+
+#none pipeline
+- pipeline.id: none_pipeline
+  path.config: "/pipelines/sw04"
+  queue.type : persisted

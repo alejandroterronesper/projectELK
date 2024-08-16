@@ -1,0 +1,59 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.inputs:
+
+    #PELICULAS
+  - type: filestream
+    id: movies_input
+    paths:
+      - /movie/movie.json
+    fields_under_root: true
+    parsers:
+      - ndjson:
+          keys_under_root: true
+          overwrite_keys: false
+          add_error_key: true
+          expand_keys: true
+    fields:
+      tipo: movies
+
+
+    #CRITICAS
+  - type: filestream
+    id: critic_input
+    paths:
+      - /critic/critic.json
+    fields_under_root: true
+    parsers:
+      - ndjson:
+          keys_under_root: true
+          overwrite_keys: false
+          add_error_key: true
+          expand_keys: true
+    fields:
+      tipo: critic
+
+
+
+    #USUARIOS
+  - type: filestream
+    id: user_input
+    paths:
+      - /user/user.json
+    fields_under_root: true
+    parsers:
+      - ndjson:
+          keys_under_root: true
+          overwrite_keys: false
+          add_error_key: true
+          expand_keys: true
+    fields:
+      tipo: user
+
+
+
+output.logstash:
+  hosts: ["fpp-logstash:5044"]
